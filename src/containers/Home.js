@@ -4,12 +4,24 @@ import keydown from 'react-keydown'
 import gun, { gunGet } from '../gun'
 //
 
+
+const voteOpts = [
+  'Fake news',
+  'Difamaçao',
+  'Apoio',
+  'Neutro',
+  'Não politico',
+  'Manipulada',
+]
+
+const voteKeys = voteOpts.map((k, i) => (i + 1).toString())
+
 class Main extends React.PureComponent {
   state = {
     idx: 0,
     img: this.props.images[0]
   }
-  @keydown('1', '2', '3', '4')
+  @keydown(voteKeys)
   onKeyPress({key}) {
     const {img, idx} = this.state
     gun.get(img).once((data) => {
@@ -17,7 +29,7 @@ class Main extends React.PureComponent {
       gun.put({
         [img]: {
           ...data,
-          [key]: (data[key] || 0) + 1
+          [voteOpts[key]]: (data[voteOpts[key]] || 0) + 1
         }
       })
     })
@@ -42,7 +54,15 @@ class Main extends React.PureComponent {
     return (
       <div>
           <p>Gun score {JSON.stringify(votes)}</p>
-          <h1 style={{ textAlign: 'center' }}>1: Fake, 2: Propaganda, 3: Campanha, 4: Haddad</h1>
+          <h1 style={{ textAlign: 'center' }}>votes</h1>
+          <ul style={{display: 'flex'}}>
+              {voteOpts.map((v, k) => <li key={voteOpts[k]} style={{
+                display: 'block',
+                padding: 10
+              }}>
+                  <b>{`${k+1}`}</b> - {`${voteOpts[k]}`}
+              </li>)}
+          </ul>
           <img src={`/images/${img}`}/>
 
       </div>
