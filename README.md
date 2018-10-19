@@ -1,10 +1,22 @@
-# React-Static - Basic Example
+# A simple image cataloguer that stores results in GUN
 
-This example is the most basic version of react-static available. It includes:
-- Babel
-- CSS imports
-- Image imports
-- File imports
-- Automatic Routing
+## Getting started
+copy the images you want to classify to `public/images` you probably do not
+want to add those to git.
 
-To get started, run `react-static create` and use the `basic` template.
+```sh
+# install deps
+yarn
+# run the GUN server or set GUN_URL to an external one
+node src/gun.server.js &
+# start the dev server
+yarn start
+```
+
+## Deploying
+you can deploy this site easily to any hosting, note that you will *NEED* a
+GUN server (until browsers can actually do p2p).
+
+## Querying results
+to get results you need to get to the gunDB, just get the node set in the
+`GUN_CLASS` in `src/gun.js`
