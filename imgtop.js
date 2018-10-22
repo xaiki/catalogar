@@ -1,12 +1,15 @@
 const fs = require('fs')
 const readline = require('readline')
 
-const reader = readline.createInterface({
-    input: fs.createReadStream('messages.json')
-})
-
+const file = process.argv.pop()
 const type = process.argv.pop()
 const data = {}
+
+
+const reader = readline.createInterface({
+    input: fs.createReadStream(file)
+})
+
 
 reader.on('line', line => {
     const e = JSON.parse(line)
