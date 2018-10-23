@@ -18,7 +18,7 @@ reader.on('line', line => {
     if (data[key]) {
         data[key].score++
         data[key].senders[e.sender_id] = data[key].senders[e.sender_id] ? data[key].senders[e.sender_id] + 1 : 1
-        data[key].captions[e.caption] = data[key].captions[e.caption] ? data[key].captions[e.caption] + 1 : 1
+        data[key].captions[e.media.caption] = data[key].captions[e.media.caption] ? data[key].captions[e.media.caption] + 1 : 1
     } else {
         const ext = e.media.mime.split('/').pop()
         const timestamp = e.timestamp['$date']
@@ -29,7 +29,7 @@ reader.on('line', line => {
                 [e.sender_id]: 1
             },
             captions: {
-                [e.caption]: 1
+                [e.media.caption]: 1
             }
         }
     }
