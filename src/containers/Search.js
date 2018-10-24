@@ -44,7 +44,7 @@ const ChatSearch = ({ term, data: { error, loading, search = [] }}) => {
     return <p>Error!</p>
   }
   return (
-    <div>
+    <div style={{paddingTop: '2em'}}>
         <p>Loaded successfully: {term}</p>
         <ul>
             {search.map(s => <li key={s.timestamp + s.src}><Chat  {...s}/></li>)}
