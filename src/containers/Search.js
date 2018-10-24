@@ -5,15 +5,14 @@ import gql from 'graphql-tag'
 import './chat.css'
 import './search.css'
 
-const Chat = ({id, document: {body, name}}) => {
-  const [timestamp, number] = id.split('Z')
+const Chat = ({ src, group, body, caption, timestamp}) => {
   return (
     <div className="msg">
         <div className="bubble">
             <div className="txt">
-                <span className="name">+{number}<span> ~ {name}</span></span>
+                <span className="name">+{src}<span> ~ {group}</span></span>
                 <span className="timestamp">{timestamp}</span>
-                <p className="message">{body}</p>
+                <p className="message">{caption ? caption : body}</p>
             </div>
             <div className="bubble-arrow"></div>
         </div>
@@ -29,32 +28,38 @@ const Chat = ({id, document: {body, name}}) => {
 const SEARCH_CHATS = gql`
   query Chats($term: String!) {
     search(term: $term) {
-      id,
-      document {
-        body
-        date
-      }
+      src,
+      group,
+      caption,
+      timestamp,
+      body,
     }
   }
 `
 
-const ChatSearchResults = ({ term }) => (
-  <Query query={SEARCH_CHATS} variables={{ term }}>
-      {({ data: { loading, error, search } }) => {
-         if (loading) {
-           return <p>Loading...</p>
-         } else if (error) {
-           return <p>Error!</p>
-         }
-         return (
-           <div>
-               <p>Loaded successfully: {term}</p>
-               {search && search.filter(s => s.document).map(s => <Chat key={s.id} {...s}/>)}
-           </div>
-         )
-      }}
-  </Query>
-)
+const ChatSearch = ({ term, data: { error, loading, search = [] }}) => {
+  if (loading) {
+    return <p>Loading...</p>
+  } else if (error) {
+    return <p>Error!</p>
+  }
+  return (
+    <div>
+        <p>Loaded successfully: {term}</p>
+        <ul>
+            {search.map(s => <li key={s.timestamp + s.src}><Chat  {...s}/></li>)}
+        </ul>
+    </div>
+  )
+}
+
+const ChatSearchConnected = graphql(SEARCH_CHATS, {
+  options: ({term}) => ({
+    variables: {
+      term
+    }
+  })
+})(ChatSearch)
 
 class Search extends React.PureComponent {
   state = {
@@ -76,7 +81,7 @@ class Search extends React.PureComponent {
               <div className="search">
                   <i className="fa fa-search fa" aria-hidden="true"></i>
                   <input type="text" className="input-search" placeholder="Fake News uber alles" onChange={this.onChange.bind(this)}/>
-                  {term && <ChatSearchResults term={term} />}
+                  {term && <ChatSearchConnected term={term} />}
               </div>
           </div>
       </div>
