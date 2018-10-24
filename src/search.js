@@ -2,13 +2,14 @@ const fs = require('fs')
 const readline = require('readline')
 const { Readable } = require('stream')
 const SearchIndex = require('search-index')
+const debug = require('debug')('catalogar:search')
 
 const ops = {
     indexPath: 'myCoolIndex',
     logLevel: 'error'
 }
 
-const run = (source, dest = 'public/data/tfidf.json') => new Promise ((accept, reject)=> {
+const searchIndex = (source, dest = 'public/data/tfidf.json') => new Promise ((accept, reject)=> {
     let index
     const docs = []
 
@@ -28,12 +29,14 @@ const run = (source, dest = 'public/data/tfidf.json') => new Promise ((accept, r
         const doc = {
             date: timestamp,
             id: filename,
-            body: e.media ? e.media.caption : e.content,
+            body: (['image', 'video'].indexOf(e.message_type) === -1) ?
+                  e.content : e.media.caption || `shared ${e.message_type} without caption`
         }
         docs.push(doc)
     })
 
     reader.on('close', () => {
+        debug('done')
         stream.destroy()
     })
 
@@ -51,4 +54,4 @@ const run = (source, dest = 'public/data/tfidf.json') => new Promise ((accept, r
     SearchIndex(ops, indexData)
 })
 
-module.exports = run
+module.exports = searchIndex

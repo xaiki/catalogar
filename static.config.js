@@ -48,6 +48,10 @@ export default {
         component: 'src/containers/About',
       },
       {
+        path: '/search',
+        component: 'src/containers/Search',
+      },
+      {
         path: '/blog',
         component: 'src/containers/Blog',
         getData: () => ({
