@@ -21,8 +21,8 @@ ${e}
 
 class Chat {
     constructor() {
-        this.GET_ALL = makeQuery(`SELECT * FROM chats`)
-        this.SEARCH = makeQuery(`SELECT * FROM chats where body MATCH ?`)
+        const GET_ALL = makeQuery(`SELECT * FROM chats`)
+        const SEARCH = makeQuery(`SELECT * FROM chats where body MATCH ?`)
         this.getAll = () => GET_ALL.all()
         this.search = param => SEARCH.all(param)
     }
