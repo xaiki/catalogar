@@ -1,4 +1,4 @@
-const prepare = require('./search')
+const prepare = require('./src/search')
 const chalk = require('chalk')
 const tc = require('term-cluster')
 
