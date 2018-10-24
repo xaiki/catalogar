@@ -32,8 +32,7 @@
     "react-hot-loader": "^4.0.0-beta.21",
     "react-keydown": "^1.9.7",
     "react-router": "^4.2.0",
-    "react-static": "^5.9.12",
-    "search-index": "^0.15.1",
+    "react-static": "^5.9.12"
   },
   "devDependencies": {
     "eslint-config-react-tools": "1.x.x",
