@@ -19,22 +19,20 @@ ${e}
     return ret
 }
 
-const Chats = () => {
-    const GET_ALL = makeQuery(`SELECT * FROM chats`)
-    const SEARCH = makeQuery(`SELECT * FROM chats where body MATCH ?`)
-
-    return {
-        name: 'Chat',
-        getAll: () => GET_ALL.all(),
-        search: param => SEARCH.all(param),
+class Chat {
+    constructor() {
+        this.GET_ALL = makeQuery(`SELECT * FROM chats`)
+        this.SEARCH = makeQuery(`SELECT * FROM chats where body MATCH ?`)
+        this.getAll = () => GET_ALL.all()
+        this.search = param => SEARCH.all(param)
     }
 }
 
-Chats.FIELDS = 'id, timestamp, src, dest, group, type, preview, link, key, caption, mime, body'
+Chat.FIELDS = 'id, timestamp, src, dest, group, type, preview, link, key, caption, mime, body'
 
 module.exports = {
     db,
     o2gql,
     makeQuery,
-    Chats
+    Chat
 }
