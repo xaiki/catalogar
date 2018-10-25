@@ -1,0 +1,12 @@
+.chat-search {
+    padding-top: 2em;
+}
+
+.chat-search li {
+    display: block
+}
+
+.chat-result {
+    display: flex;
+    justify-content: space-around;
+}
