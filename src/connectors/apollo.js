@@ -3,12 +3,12 @@ import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import fetch from 'node-fetch'
 
-const APOLLO_HOST = process.env.APOLLO_HOST || 'localhost'
+const APOLLO_URL = process.env.APOLLO_URL || 'http://localhost:5000'
 
 const client = new ApolloClient({
     link: new HttpLink({
         fetch,
-        uri: `http://${APOLLO_HOST}:5000`,
+        uri: APOLLO_URL
     }),
     cache: new InMemoryCache(),
 })
