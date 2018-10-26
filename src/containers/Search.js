@@ -2,6 +2,7 @@ import React, { Fragment } from 'react'
 
 import ChatSearch from './ChatSearch'
 import ChatDownload from './ChatDownload'
+import ChatCounter from './ChatCounter'
 
 import './search.css'
 
@@ -28,6 +29,7 @@ class Search extends React.PureComponent {
                   <input type="text" className="input-search" placeholder="Fake News uber alles" onChange={this.onChange.bind(this)}/>
               </div>
           </div>
+          <ChatCounter term={term} />
           {download && <ChatDownload term={term}
                                      onFinish={() => this.setState({ download: false })}
           />}

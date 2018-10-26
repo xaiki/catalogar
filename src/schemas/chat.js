@@ -37,7 +37,10 @@ class Chat {
         }
 
         this.vote = (rowid, votes) => VOTE.run(storeVotes(votes), rowid)
-        this.count = () => COUNT.get()}
+        this.count = (term) => term ?
+                               COUNT.pluck().get(makeMatch({body: term})) :
+                               COUNT_ALL.pluck().get()
+    }
 }
 
 Chat.FIELDS = ['id', 'timestamp', 'src', 'dest', 'group', 'type', 'preview', 'link', 'key', 'caption', 'mime', 'body', 'votes', 'filename']

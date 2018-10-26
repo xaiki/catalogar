@@ -10,7 +10,7 @@ try {
     const FIELDS = Chat.FIELDS.join(', ').replace('id,', 'id PRIMARY KEY,')
     db.exec(`CREATE VIRTUAL TABLE chats USING fts4(${FIELDS});`)
 } catch(e) {
-    //pass
+    debug(e)
 }
 
 const chats = new Chat(db)

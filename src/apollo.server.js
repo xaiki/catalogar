@@ -19,7 +19,7 @@ const typeDefs = gql`
     }
 
     type Query {
-        chats: [Chat]
+        count(term: String): Int
         getType(type: String!, voted: Boolean, skip: Int, limit: Int): PaginatedResponse
         getTypeAll(type: String!, voted: Boolean): [Chat]
         search(term: String!, skip: Int, limit: Int): PaginatedResponse
@@ -50,7 +50,7 @@ const BUCKET_SIZE = 20
 const chats = new Chat(db)
 const resolvers = {
     Query: {
-        chats: () => chats.getAll(),
+        count: (root, args) => chats.count(args && args.term),
         getType: (root, {type = 'image', ...args}) => paginated(chats.getType, {...args, type}),
         search: (root, args) => paginated(chats.search, {...args}),
         searchAll: (root, {term}) => chats.search(term)},
