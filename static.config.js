@@ -17,6 +17,10 @@ export default {
         component: 'src/containers/Search',
       },
       {
+        path: '/sort',
+        component: 'src/containers/Sort',
+      },
+      {
         is404: true,
         component: 'src/containers/404',
       },

@@ -15,6 +15,7 @@ const App = () => (
               <nav>
                   <Link exact to="/">Home</Link>
                   <Link to="/search">Search</Link>
+                  <Link to="/sort">Sort</Link>
                   <Link to="/about">About</Link>
                   <Link to="/blog">Blog</Link>
               </nav>
