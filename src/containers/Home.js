@@ -18,10 +18,7 @@ const GET_UNVOTED = gql`
     getType(type: $type, voted: false) {
       chats {
         rowid,
-        src,
-        caption,
-        preview,
-        body,
+        filename,
         votes
       }
       pageInfo {
@@ -50,7 +47,7 @@ class Vote extends React.PureComponent {
   @keydown(voteKeys)
   onKeyPress({key}) {
     const {rowid, votes} = this.current
-    const {img, idx} = this.state
+    const {idx} = this.state
     const vote = voteOpts[key]
     const vo = extractVotes(votes)
     vo[vote] = (vo[vote] || 0) + 1
@@ -92,7 +89,7 @@ class Vote extends React.PureComponent {
 
     this.chats = chats
     this.current = chats[idx]
-    const img = chats[idx]
+    const img = `/wppmon/${chats[idx].filename}`
 
     return (
       <Mutation mutation={VOTE}>
