@@ -10,6 +10,15 @@ db.exec(`CREATE VIRTUAL TABLE chats USING fts4(${FIELDS});`)
 
 const FIELDSA = Chat.FIELDS.map(a => `@${a}`).join(', ')
 
+const makeFilename = e => {
+    const date = e.timestamp['$date'].replace(/\..*/, '').replace('T', '_').replace(/:/g, '-')
+    const src = e.sender_id.replace(/@.*/, '')
+    const file = e.media.filename
+    const type = e.message_type
+
+    return `${type}s/${date}_${src}_${file}`
+}
+
 const e2f = e => ({
     row: e.rowid,
     id: e._id,
@@ -23,6 +32,7 @@ const e2f = e => ({
     key: e.media.key,
     caption: e.media.caption,
     mime: e.media.mime,
+    filename: makeFilename(e),
     body: (['image', 'video'].indexOf(e.message_type) === -1) ?
           e.content : e.media.caption,
     votes: 'NULL'
