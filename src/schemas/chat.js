@@ -11,36 +11,32 @@ class Chat {
         }
 
         const GET_ALL = makeQuery(`${SELECT_ALL}`)
-        const SEARCH = makeQuery(`${SELECT_ALL} where body MATCH ?`)
-        const SEARCH_LIMIT = makeQuery(`${SELECT_ALL} where body MATCH ? LIMIT ? OFFSET ?`)
-
-        const GET_TYPE = makeQuery(`${SELECT_ALL} where type MATCH ?`)
-        const GET_TYPE_LIMIT = makeQuery(`${SELECT_ALL} where type MATCH ? LIMIT ? OFFSET ?`)
-
-        const GET_TYPE_UNVOTED = makeQuery(`${SELECT_ALL} where chats MATCH ?`)
-        const GET_TYPE_UNVOTED_LIMIT = makeQuery(`${SELECT_ALL} where chats MATCH ? LIMIT ? OFFSET ?`)
+        const SEARCH = makeQuery(`${SELECT_ALL} WHERE chats MATCH ? LIMIT ? OFFSET ?`)
 
         const VOTE = makeQuery(`UPDATE chats SET votes = ? WHERE rowid = ?`)
+        const COUNT = makeQuery(`SELECT COUNT(*) from chats WHERE chats MATCH ? `)
 
-        const makeMatch = (match) => Object.entries(match).map(e => e.join(': ')).join(' AND ')
+        const makeMatch = (match) => match ?
+                                     Object.entries(match)
+                                           .map(e => e.join(': '))
+                                           .join(' AND '): ''
+
+        const makeOp = (op, arg) => arg ? `${op} ${arg}`: ''
+
 
         this.getAll = () => GET_ALL.all()
-        this.search = ({param, limit, skip = 0}) =>
-            limit ?
-            SEARCH_LIMIT.all(param, limit, skip) :
-            SEARCH.all(param)
-        this.getType = ({type, limit, skip = 0, voted = false}) =>
-            voted ? (
-                limit ?
-                GET_TYPE_LIMIT.all(type, limit, skip) :
-                GET_TYPE.all(type)
-            ) : (
-                limit ?
-                GET_TYPE_UNVOTED_LIMIT.all(makeMatch({type, votes: 'NULL'}), limit, skip) :
-                GET_TYPE_UNVOTED.all(makeMatch({type}))
-            )
+        this.search = ({param, limit = -1, offset = 0}) =>
+            SEARCH.all(makeMatch({body: param}), limit, offset)
+
+        this.getType = ({type, voted = false, limit, offset = 0}) =>  {
+            const args = {type}
+            if (! voted)
+                args.votes = 'NULL'
+            return SEARCH.all(makeMatch(args), limit, offset)
+        }
+
         this.vote = (rowid, votes) => VOTE.run(storeVotes(votes), rowid)
-    }
+        this.count = () => COUNT.get()}
 }
 
 Chat.FIELDS = ['id', 'timestamp', 'src', 'dest', 'group', 'type', 'preview', 'link', 'key', 'caption', 'mime', 'body', 'votes', 'filename']
