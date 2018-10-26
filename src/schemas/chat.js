@@ -3,6 +3,10 @@ const debug = console.error.bind(console)
 
 const SELECT_ALL = `SELECT rowid,* FROM chats`
 
+const makeMatch = (match) => match ?
+                             Object.entries(match)
+                                   .map(e => e.join(': '))
+                                   .join(' AND '): ''
 class Chat {
     constructor(db) {
         const makeQuery = (query) => {
@@ -14,15 +18,12 @@ class Chat {
         const SEARCH = makeQuery(`${SELECT_ALL} WHERE chats MATCH ? LIMIT ? OFFSET ?`)
 
         const VOTE = makeQuery(`UPDATE chats SET votes = ? WHERE rowid = ?`)
+        const COUNT_ALL = makeQuery(`SELECT COUNT(*) from chats`)
         const COUNT = makeQuery(`SELECT COUNT(*) from chats WHERE chats MATCH ? `)
 
-        const makeMatch = (match) => match ?
-                                     Object.entries(match)
-                                           .map(e => e.join(': '))
-                                           .join(' AND '): ''
-
-        const makeOp = (op, arg) => arg ? `${op} ${arg}`: ''
-
+        // XXX: HACKS
+        this.makeMatch = makeMatch
+        this.SEARCH = SEARCH
 
         this.getAll = () => GET_ALL.all()
         this.search = ({term, limit = -1, offset = 0}) =>

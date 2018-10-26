@@ -27,7 +27,7 @@ reader.on('line', line => {
         data[key] = {
             filename: filename,
             score: 1,
-                  senders: {
+            senders: {
                 [e.sender_id]: 1
             },
             captions: {
