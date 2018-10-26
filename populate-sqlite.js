@@ -1,6 +1,7 @@
 const fs = require('fs')
 const readline = require('readline')
 const { db, makeQuery } = require('./src/connectors/apollo/sqlite')
+const { makeFilename } = require('./src/utils')
 const Chat = require('./src/schemas/chat')
 const debug = require('debug')('catalogar:populate')
 
@@ -17,15 +18,6 @@ const ids = new Set(db.prepare(`SELECT id FROM chats`).pluck().all())
 debug(`${ids.size} elements in table`)
 
 const FIELDSA = Chat.FIELDS.map(a => `@${a}`).join(', ')
-
-const makeFilename = e => {
-    const date = e.timestamp['$date'].replace(/\..*/, '').replace('T', '_').replace(/:/g, '-')
-    const src = e.sender_id.replace(/@.*/, '')
-    const file = e.media.filename
-    const type = e.message_type
-
-    return `${type}s/${date}_${src}_${file}`
-}
 
 const e2f = e => ({
     row: e.rowid,

@@ -1,5 +1,6 @@
 const fs = require('fs')
 const readline = require('readline')
+const { makeFilename } = require('./src/utils')
 
 const file = process.argv.pop()
 const type = process.argv.pop()
@@ -16,10 +17,7 @@ reader.on('line', line => {
     const e = JSON.parse(line)
     if (e.message_type !== type) return
     const key = e.content
-
-    const ext = e.media.mime.split('/').pop()
-    const timestamp = e.timestamp['$date']
-    const filename = `${type}s/${timestamp}${e.sender_id}.${ext}`
+    const filename = makeFilename(e)
 
     if (data[key]) {
         data[key].score++
