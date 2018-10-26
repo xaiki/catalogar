@@ -1,23 +1,47 @@
 const { ApolloServer, gql } = require('apollo-server');
-const { o2gql, Chat } = require('./connectors/apollo/sqlite')
+const { db, o2gql } = require('./connectors/apollo/sqlite')
+const Chat = require('./connectors/schemas/chat')
 
 // Type definitions define the "shape" of your data and specify
 // which ways the data can be fetched from the GraphQL server.
 const typeDefs = gql`
     ${o2gql(Chat)}
 
+    type PageInfo {
+        endCursor: Int
+        hasNextPage: Boolean
+    }
+
+    type SearchResult {
+        chats: [Chat]
+        pageInfo: PageInfo
+    }
+
     type Query {
         chats: [Chat]
-        search(term: String): [Chat]
+        search(term: String!, skip: Int, limit: Int): SearchResult
+        searchAll(term: String): [Chat]
     }
 `;
 
 // Resolvers define the technique for fetching the types in the
 // schema.  We'll retrieve chats from the "chats" array above.
-const chats = new Chat()
+const BUCKET_SIZE = 20
+const chats = new Chat(db)
 const resolvers = {
     Query: {
-        search: (root, {term}) => chats.search(term),
+        search: (root, {term, skip = 0, limit = BUCKET_SIZE}) => {
+            const results = chats.search(term, limit + 1, skip)
+            const hasNextPage = results.length > limit
+            return {
+                chats: results.slice(0, limit),
+                pageInfo: {
+                    endCursor: skip + limit,
+                    hasNextPage
+                }
+            }
+        },
+        searchAll: (root, {term}) => chats.search(term)
     },
 };
 

@@ -1,12 +1,13 @@
 const fs = require('fs')
 const readline = require('readline')
-const { db, makeQuery, Chat } = require('./src/connectors/apollo/sqlite')
+const { db, makeQuery } = require('./src/connectors/apollo/sqlite')
+const Chat = require('./src/connectors/schemas/chat')
 
 console.error('creating table')
-const FIELDS = Chat.FIELDS.replace('id,', 'id PRIMARY KEY,')
+const FIELDS = Chat.FIELDS.join(', ').replace('id,', 'id PRIMARY KEY,')
 db.exec(`CREATE VIRTUAL TABLE chats USING fts4(${FIELDS});`)
 
-const FIELDSA = Chat.FIELDS.split(', ').map(a => `@${a}`).join(', ')
+const FIELDSA = Chat.FIELDS.map(a => `@${a}`).join(', ')
 
 const e2f = e => ({
     id: e._id,

@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { Fragment} from 'react'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
-import saveAs from 'file-saver'
+import { AutoSizer, InfiniteLoader, List } from 'react-virtualized';
+import 'react-virtualized/styles.css'; // only needs to be imported once
+
 
 import Chat from '../components/Chat'
+
 import './chatsearch.css'
 
 // /////////////////////////////////////////////////////////
@@ -11,51 +14,99 @@ import './chatsearch.css'
 // From https://www.apollographql.com/docs/react/basics/queries.html
 // Display component
 
+const remoteRowCount = 10000
+
 const SEARCH_CHATS = gql`
-    query Chats($term: String!) {
-        search(term: $term) {
-            src,
-            group,
-            caption,
-            timestamp,
-            body,
+    query Chats($term: String!, $skip: Int) {
+        search(term: $term, skip: $skip) {
+            chats {
+                src,
+                group,
+                caption,
+                timestamp,
+                body,
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+            }
         }
     }
 `
 
-const sendFile = (term, docs) => {
-    const data = [Object.keys(docs[0]).join('\t') + '\n']
-    for (const doc of docs) data.push(Object.values(doc).map(v => v ? v.replace(/\n/g, '\\n') : '').join('\t') + '\n')
-    const blob = new Blob(data, {type: "text/plain;charset=utf-8"});
+const ChatSearch = ({ term, data: { loading, error, search, loadMore } }) => {
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error</p>;
+    const {
+        chats = [],
+        pageInfo: { hasNextPage } = {},
+    } = search || {}
 
-    saveAs(blob, `${term}.tsv`)
-}
-
-const ChatSearch = ({ term, data: { error, loading, search = [] }}) => {
-    if (loading) {
-        return <p>Loading...</p>
-    } else if (error) {
-        return <p>Error!</p>
-    }
-    return (
-        <div className='chat-search'>
-            <div className='chat-result'>
-                <p>Loaded successfully: {term}</p>
-                <button onClick={() => sendFile(term, search)}>GET TSV</button>
-            </div>
-            <ul>
-                {search.map(s => <li key={s.timestamp + s.src}><Chat  {...s}/></li>)}
-            </ul>
+    const chatRenderer = ({ key, index, style }) => (
+        <div
+            key={key}
+        >
+            {<Chat {...chats[index]}/>}
         </div>
     )
-}
 
-const ChatSearchConnected = graphql(SEARCH_CHATS, {
-    options: ({term}) => ({
-        variables: {
-            term
-        }
-    })
-})(ChatSearch)
+    const getRowHeight = ({index}) => {
+        const chat = chats[index] || {}
+
+        return (1 + (' ' + chat.body + chat.caption).length/30)*10
+    }
+
+    return (
+        <InfiniteLoader
+            isRowLoaded={index => !!chats[index]}
+            loadMoreRows={loadMore}
+            rowCount={remoteRowCount}
+        >
+            {({ onRowsRendered, registerChild }) => (
+                <AutoSizer>
+                    {({width, height}) => (
+                        <List
+                            height={height}
+                            width={width}
+                            onRowsRendered={onRowsRendered}
+                            ref={registerChild}
+                            rowCount={remoteRowCount}
+                            rowHeight={getRowHeight}
+                            rowRenderer={chatRenderer} />
+                    )}
+                </AutoSizer>
+            )}
+        </InfiniteLoader>
+    );
+};
+
+const withQuery = graphql(SEARCH_CHATS, {
+    options: ({ term }) => ({ variables: { term } }),
+    props: ({ data }) => ({
+        data: {
+            ...data,
+            loadMore: ({startIndex, stopIndex}) => data.fetchMore({
+                variables: { skip: startIndex, limit: stopIndex - startIndex},
+                updateQuery: (previousResult = {}, { fetchMoreResult = {} }) => {
+                    console.error('update query roling')
+                    const previousSearch = previousResult.search || {};
+                    const currentSearch = fetchMoreResult.search || {};
+                    const previousChats = previousSearch.chats || [];
+                    const currentChats = currentSearch.chats || [];
+                    return {
+                        ...previousResult,
+                        search: {
+                            ...previousSearch,
+                            chats: [...previousChats, ...currentChats],
+                            pageInfo: currentSearch.pageInfo,
+                        },
+                    };
+                },
+            }),
+        },
+    }),
+});
+
+const ChatSearchConnected = withQuery(ChatSearch)
 
 export default ChatSearchConnected

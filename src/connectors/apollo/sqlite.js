@@ -8,7 +8,7 @@ const makeQuery = (str) => {
 }
 
 const o2gql = (o) => {
-    const f = o.FIELDS.split(', ')
+    const f = o.FIELDS
     const e = f.map(f => `	${f}: String`).join('\n')
     let ret = `
 type ${o.name} {
@@ -19,20 +19,8 @@ ${e}
     return ret
 }
 
-class Chat {
-    constructor() {
-        const GET_ALL = makeQuery(`SELECT * FROM chats`)
-        const SEARCH = makeQuery(`SELECT * FROM chats where body MATCH ?`)
-        this.getAll = () => GET_ALL.all()
-        this.search = param => SEARCH.all(param)
-    }
-}
-
-Chat.FIELDS = 'id, timestamp, src, dest, group, type, preview, link, key, caption, mime, body'
-
 module.exports = {
     db,
     o2gql,
     makeQuery,
-    Chat
 }
