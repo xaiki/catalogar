@@ -4,7 +4,6 @@ import { graphql } from 'react-apollo'
 import { AutoSizer, InfiniteLoader, List } from 'react-virtualized';
 import 'react-virtualized/styles.css'; // only needs to be imported once
 
-
 import Chat from '../components/Chat'
 
 import './chatsearch.css'

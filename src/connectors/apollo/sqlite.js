@@ -8,7 +8,7 @@ const makeQuery = (str) => {
 }
 
 const o2gql = (o) => {
-    const f = o.FIELDS
+    const f = ['rowid'].concat(o.FIELDS)
     const e = f.map(f => `	${f}: String`).join('\n')
     let ret = `
 type ${o.name} {

@@ -1,15 +1,17 @@
 const fs = require('fs')
 const readline = require('readline')
 const { db, makeQuery } = require('./src/connectors/apollo/sqlite')
-const Chat = require('./src/connectors/schemas/chat')
+const Chat = require('./src/schemas/chat')
+const debug = require('debug')('catalogar:populate')
 
-console.error('creating table')
+debug('creating table')
 const FIELDS = Chat.FIELDS.join(', ').replace('id,', 'id PRIMARY KEY,')
 db.exec(`CREATE VIRTUAL TABLE chats USING fts4(${FIELDS});`)
 
 const FIELDSA = Chat.FIELDS.map(a => `@${a}`).join(', ')
 
 const e2f = e => ({
+    row: e.rowid,
     id: e._id,
     timestamp: e.timestamp['$date'],
     src: e.sender_id,
@@ -22,14 +24,17 @@ const e2f = e => ({
     caption: e.media.caption,
     mime: e.media.mime,
     body: (['image', 'video'].indexOf(e.message_type) === -1) ?
-          e.content : e.media.caption || `shared ${e.message_type} without caption`
+          e.content : e.media.caption,
+    votes: 'NULL'
 })
 
 const INSERT_QUERY = `INSERT INTO chats VALUES(${FIELDSA})`
 const insert = makeQuery(INSERT_QUERY)
 
 const bulkInsert = db.transaction(docs => {
+    debug(`preparing ${docs.length}`)
     for (const doc of docs) insert.run(doc)
+    debug(`inserted ${docs.length}`)
 })
 
 const populate = (source) => new Promise(accept => {

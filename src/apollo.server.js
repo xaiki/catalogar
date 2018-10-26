@@ -1,6 +1,7 @@
 const { ApolloServer, gql } = require('apollo-server');
 const { db, o2gql } = require('./connectors/apollo/sqlite')
-const Chat = require('./connectors/schemas/chat')
+const Chat = require('./schemas/chat')
+const debug = require('debug')('catalogar:server')
 
 // Type definitions define the "shape" of your data and specify
 // which ways the data can be fetched from the GraphQL server.
@@ -12,17 +13,36 @@ const typeDefs = gql`
         hasNextPage: Boolean
     }
 
-    type SearchResult {
+    type PaginatedResponse {
         chats: [Chat]
         pageInfo: PageInfo
     }
 
     type Query {
         chats: [Chat]
-        search(term: String!, skip: Int, limit: Int): SearchResult
+        getType(type: String!, voted: Boolean, skip: Int, limit: Int): PaginatedResponse
+        getTypeAll(type: String!, voted: Boolean): [Chat]
+        search(term: String!, skip: Int, limit: Int): PaginatedResponse
         searchAll(term: String): [Chat]
     }
+
+    type Mutation {
+        vote(rowid: Int!, vote: String!): Chat
+    }
 `;
+
+const paginated = (query, {limit = BUCKET_SIZE, skip = 0, ...args}) => {
+    debug('calling', query, 'with args', {...args, limit, skip})
+    const results = query({...args, limit, skip})
+    const hasNextPage = results.length > limit
+    return {
+        chats: results.slice(0, limit),
+        pageInfo: {
+            endCursor: skip + limit,
+            hasNextPage
+        }
+    }
+}
 
 // Resolvers define the technique for fetching the types in the
 // schema.  We'll retrieve chats from the "chats" array above.
@@ -30,19 +50,16 @@ const BUCKET_SIZE = 20
 const chats = new Chat(db)
 const resolvers = {
     Query: {
-        search: (root, {term, skip = 0, limit = BUCKET_SIZE}) => {
-            const results = chats.search(term, limit + 1, skip)
-            const hasNextPage = results.length > limit
-            return {
-                chats: results.slice(0, limit),
-                pageInfo: {
-                    endCursor: skip + limit,
-                    hasNextPage
-                }
-            }
-        },
-        searchAll: (root, {term}) => chats.search(term)
-    },
+        chats: () => chats.getAll(),
+        getType: (root, {type = 'image', ...args}) => paginated(chats.getType, {...args, type}),
+        search: (root, args) => paginated(chats.search, {...args}),
+        searchAll: (root, {term}) => chats.search(term)},
+    Mutation: {
+        vote: (root, {rowid, vote}) => {
+            debug('calling', rowid, vote)
+            chats.vote(rowid, JSON.parse(vote))
+        }
+    }
 };
 
 // In the most basic sense, the ApolloServer can be started

@@ -2,7 +2,7 @@ import React from 'react'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import saveAs from 'file-saver'
-import Chat from '../connectors/schemas/chat'
+import Chat from '../schemas/chat'
 
 const ALL_FIELDS = Chat.FIELDS.join('\n            ')
 

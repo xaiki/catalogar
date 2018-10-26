@@ -1,9 +1,35 @@
 import React from 'react'
-import { withSiteData } from 'react-static'
 import keydown from 'react-keydown'
-import gun, { gunGet } from '../gun'
-//
+import gql from 'graphql-tag';
+import { graphql, Mutation } from 'react-apollo';
+import { extractVotes } from '../votes'
 
+const VOTE = gql`
+  mutation Vote($rowid: Int!, $vote: String!) {
+    vote(rowid: $rowid, vote: $vote) {
+      id
+      votes
+    }
+  }
+`
+
+const GET_UNVOTED = gql`
+  query GetUnvoted($type: String!) {
+    getType(type: $type, voted: false) {
+      chats {
+        rowid,
+        src,
+        caption,
+        preview,
+        body,
+        votes
+      }
+      pageInfo {
+        endCursor
+      }
+    }
+  }
+`
 
 const voteOpts = [
   'Fake news',
@@ -16,57 +42,87 @@ const voteOpts = [
 
 const voteKeys = voteOpts.map((k, i) => (i + 1).toString())
 
-class Main extends React.PureComponent {
+class Vote extends React.PureComponent {
   state = {
     idx: 0,
-    img: this.props.images[0]
+    fetching: false
   }
   @keydown(voteKeys)
   onKeyPress({key}) {
+    const {rowid, votes} = this.current
     const {img, idx} = this.state
-    gun.get(img).once((data) => {
-      data = data || {}
-      gun.put({
-        [img]: {
-          ...data,
-          [voteOpts[key]]: (data[voteOpts[key]] || 0) + 1
-        }
-      })
-    })
+    const vote = voteOpts[key]
+    const vo = extractVotes(votes)
+    vo[vote] = (vo[vote] || 0) + 1
 
-    const nextIdx = idx + 1
-    const nextImg = this.props.images[nextIdx]
-    gun.get(nextImg).once(votes => {
-      // remove gunisms
-      delete votes[`_`]
-      delete votes[`>`]
+    this.mutation({ variables: { rowid: Number(rowid), vote: JSON.stringify(vo) }})
 
-      this.setState({
-        idx: nextIdx,
-        img: nextImg,
-        votes,
-      })
+    this.setState({
+      idx: idx + 1,
     })
   }
   render () {
-    const {idx, img, votes} = this.state
+    const {data: { loading, error, getType, fetchMore}} = this.props
+    const {idx, fetching} = this.state
+    const setMutation = mutation => this.mutation = mutation
+
+    if (loading) return `Loading...`
+    if (error) return `Error ${error.message}`
+
+    const { chats } = getType
+    if (!fetching &&  idx > chats.length - 10) {
+      this.setState({fetching: true})
+      fetchMore({
+        variables: {
+          skip: chats.length
+        },
+        updateQuery: (prev: { getType : chats }, { fetchMoreResult }) => {
+          this.setState({fetching: false})
+          if (!fetchMoreResult) return prev;
+          const newChats = fetchMoreResult.getType.chats
+          return {
+            getType: {
+              ...prev.getType,
+              chats: [...chats, ...newChats]
+            }
+          }
+        }
+      })
+    }
+
+    this.chats = chats
+    this.current = chats[idx]
+    const img = chats[idx]
 
     return (
-      <div>
-          <p>Gun score {JSON.stringify(votes)}</p>
-          <h1 style={{ textAlign: 'center' }}>votes</h1>
-          <ul style={{display: 'flex'}}>
-              {voteOpts.map((v, k) => <li key={voteOpts[k]} style={{
-                display: 'block',
-                padding: 10
-              }}>
-                  <b>{`${k+1}`}</b> - {`${voteOpts[k]}`}
-              </li>)}
-          </ul>
-          <img src={`/images/${img}`} style={{margin: 'auto 0'}}/>
-
-      </div>
+      <Mutation mutation={VOTE}>
+      {(vote, { loading, error, data }) => {
+        setMutation(vote)
+        return  (
+          <div>
+              { loading && `loading...`}
+              { error && `Error: ${error.message}`}
+              { fetching && `fetching...`}
+              <h1 style={{ textAlign: 'center' }}>{idx} votes</h1>
+              <ul style={{display: 'flex'}}>
+                  {voteOpts.map((v, k) => <li key={voteOpts[k]} style={{
+                    display: 'block',
+                    padding: 10
+                  }}>
+                      <b>{`${k+1}`}</b> - {`${voteOpts[k]}`}
+                  </li>)}
+              </ul>
+              <img src={`/images/${img}`} style={{margin: 'auto 0'}}/>
+          </div>
+        )
+      }}
+      </Mutation>
     )
   }
 }
-export default withSiteData(Main)
+
+const withQuery = graphql(GET_UNVOTED, {
+  options: ({ type = 'image'}) => ({ variables: { type }})
+})
+
+export default withQuery(Vote)
