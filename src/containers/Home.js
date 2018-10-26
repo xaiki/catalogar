@@ -109,7 +109,7 @@ class Vote extends React.PureComponent {
                       <b>{`${k+1}`}</b> - {`${voteOpts[k]}`}
                   </li>)}
               </ul>
-              <img src={`/images/${img}`} style={{margin: 'auto 0'}}/>
+              <img src={img} style={{margin: 'auto 0'}}/>
           </div>
         )
       }}
