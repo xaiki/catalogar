@@ -4,9 +4,17 @@ const { db, makeQuery } = require('./src/connectors/apollo/sqlite')
 const Chat = require('./src/schemas/chat')
 const debug = require('debug')('catalogar:populate')
 
-debug('creating table')
-const FIELDS = Chat.FIELDS.join(', ').replace('id,', 'id PRIMARY KEY,')
-db.exec(`CREATE VIRTUAL TABLE chats USING fts4(${FIELDS});`)
+try {
+    debug('creating table')
+    const FIELDS = Chat.FIELDS.join(', ').replace('id,', 'id PRIMARY KEY,')
+    db.exec(`CREATE VIRTUAL TABLE chats USING fts4(${FIELDS});`)
+} catch(e) {
+    //pass
+}
+
+const chats = new Chat(db)
+const ids = new Set(db.prepare(`SELECT id FROM chats`).pluck().all())
+debug(`${ids.size} elements in table`)
 
 const FIELDSA = Chat.FIELDS.map(a => `@${a}`).join(', ')
 
@@ -57,6 +65,7 @@ const populate = (source) => new Promise(accept => {
 
     reader.on('line', line => {
         const e = JSON.parse(line)
+        if (ids.has(e._id)) return
         docs[e._id] = (e2f(e))
     })
 
