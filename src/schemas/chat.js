@@ -1,5 +1,5 @@
 const { storeVotes } = require('../votes')
-const debug = require('debug')('catalogar:chatSchema')
+const debug = console.error.bind(console)
 
 const SELECT_ALL = `SELECT rowid,* FROM chats`
 
