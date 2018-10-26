@@ -25,8 +25,8 @@ class Chat {
 
 
         this.getAll = () => GET_ALL.all()
-        this.search = ({param, limit = -1, offset = 0}) =>
-            SEARCH.all(makeMatch({body: param}), limit, offset)
+        this.search = ({term, limit = -1, offset = 0}) =>
+            SEARCH.all(makeMatch({body: term}), limit, offset)
 
         this.getType = ({type, voted = false, limit, offset = 0}) =>  {
             const args = {type}
