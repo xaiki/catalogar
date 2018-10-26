@@ -27,7 +27,7 @@ const e2f = e => ({
     dest: e.chat_id,
     group: e.group_name,
     type: e.message_type,
-    preview: e.content,
+    preview: e.message_type !== 'chat' ? e.content : null,
     link: e.media.link,
     key: e.media.key,
     caption: e.media.caption,
