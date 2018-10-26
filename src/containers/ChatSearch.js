@@ -23,6 +23,8 @@ const SEARCH_CHATS = gql`
                 group,
                 caption,
                 timestamp,
+                preview,
+                filename,
                 body,
             }
             pageInfo {
