@@ -13,7 +13,10 @@ reader.on('line', line => {
     top.add(JSON.parse(line))
 })
 
-const s2s = (senders) => Object.entries(senders).map(e => e.join(':')).join(',')
+const s2s = (senders) => Object.entries(senders)
+                               .sort(([ka, va], [kb, vb]) => vb - va)
+                               .map(e => e.join(':'))
+                               .join(',')
 
 reader.on('close', () => {
     const res = top.sort()
