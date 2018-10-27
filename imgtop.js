@@ -6,7 +6,7 @@ const file = process.argv.pop()
 const type = process.argv.pop()
 const data = {}
 
-const search = process.env.CT_SEARCH || NULL
+const search = process.env.CT_SEARCH || null
 let found
 
 const reader = readline.createInterface({
