@@ -53,7 +53,7 @@ const resolvers = {
         count: (root, args) => chats.count(args && args.term),
         getType: (root, {type = 'image', ...args}) => paginated(chats.getType, {...args, type}),
         search: (root, args) => paginated(chats.search, {...args}),
-        searchAll: (root, {term}) => chats.search(term)},
+        searchAll: (root, {term}) => chats.search({term})},
     Mutation: {
         vote: (root, {rowid, vote}) => {
             debug('calling', rowid, vote)

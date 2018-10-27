@@ -7,9 +7,9 @@ const GET_COUNT = gql`
         count(term: $term)
     }
 `
-const ChatCounter = ({ data: { loading, error, count }}) => (
+const ChatCounter = ({term,  data: { loading, error, count }}) => (
     <div>
-        <span>Total Matches: {count}</span>
+        <span>Total Matches: {count} ({term})</span>
         {error && `${error.message}`}
         {loading && `loading...`}
     </div>

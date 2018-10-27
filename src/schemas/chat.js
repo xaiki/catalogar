@@ -26,19 +26,19 @@ class Chat {
         this.SEARCH = SEARCH
 
         this.getAll = () => GET_ALL.all()
-        this.search = ({term, limit = -1, offset = 0}) =>
-            SEARCH.all(makeMatch({body: term}), limit, offset)
-
-        this.getType = ({type, voted = false, limit, offset = 0}) =>  {
-            const args = {type}
+        this.search = ({term, limit = -1, offset = 0}) => SEARCH.all(term, limit, offset)
+        this.getType = ({term, type, voted = false, limit, offset = 0}) =>  {
+            let q = `type: ${type}`
             if (! voted)
-                args.votes = 'NULL'
-            return SEARCH.all(makeMatch(args), limit, offset)
+                q += ` AND votes: NULL`
+            if (term)
+                q+= ` AND body: ${term}`
+            return SEARCH.all(q, limit, offset)
         }
 
         this.vote = (rowid, votes) => VOTE.run(storeVotes(votes), rowid)
         this.count = (term) => term ?
-                               COUNT.pluck().get(makeMatch({body: term})) :
+                               COUNT.pluck().get(term) :
                                COUNT_ALL.pluck().get()
     }
 }
