@@ -23,9 +23,9 @@ class Top {
             this.data[key].senders[e.sender_id] =
                 this.data[key].senders[e.sender_id] ?
                 this.data[key].senders[e.sender_id] + 1 : 1
-            this.data[key].groups[e.group_id] =
-                this.data[key].groups[e.group_id] ?
-                this.data[key].groups[e.group_id] + 1 : 1
+            this.data[key].groups[e.chat_id] =
+                this.data[key].groups[e.chat_id] ?
+                this.data[key].groups[e.chat_id] + 1 : 1
             this.data[key].captions[e.media.caption] =
                 this.data[key].captions[e.media.caption] ?
                 this.data[key].captions[e.media.caption] + 1 : 1
@@ -37,7 +37,7 @@ class Top {
                     [e.sender_id]: 1
                 },
                 groups: {
-                    [e.group_id]: 1
+                    [e.chat_id]: 1
                 },
                 captions: {
                     [e.media.caption]: 1
