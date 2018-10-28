@@ -1,10 +1,27 @@
-const makeFilename = e => {
+const crypto = require('crypto')
+
+const makeOldFilename = e => {
+    if (e.message_type === 'chat') return `chats/${e._id}`
+
     const date = e.timestamp['$date'].replace(/\..*/, '').replace('T', '_').replace(/:/g, '-')
     const src = e.sender_id.replace(/@.*/, '')
     const file = e.media.filename
     const type = e.message_type
 
     return `${type}s/${date}_${src}_${file}`
+}
+
+const makeFilename = e => {
+    if (e.message_type === 'chat') return `chats/${e._id}`
+
+    const date = e.timestamp['$date'].replace(/\..*/, '').replace('T', '_').replace(/:/g, '-')
+    const src = e.sender_id.replace(/@.*/, '')
+    const hash = crypto.createHash('md5')
+                       .update(e.content || e.media.link).digest('hex')
+    const ext = e.media.mime.replace(/.*\//, '')
+    const type = e.message_type
+
+    return `${type}s/${date}_${src}_${hash}.${ext}`
 }
 
 class Top {
