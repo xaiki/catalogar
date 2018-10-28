@@ -15,5 +15,13 @@ reader.on('line', line => {
 
 reader.on('close', () => {
     const res = top.sort()
-    res.map(e => console.log(`${e.filename}\t${e.score}\t${s2s(e.senders)}\t${s2s(e.groups)}`))
+    console.log(
+        ['content', 'count', 'senders_count', 'groups_count', 'filename_counts', 'senders', 'groups'].join('\t'))
+    res.map(e => {
+        const senders = s2s(e.senders)
+        const groups = s2s(e.groups)
+        const filenames = s2s(e.filenames)
+        console.log(
+            [e.filename, e.score, senders.length, groups.length, filenames.length, senders.join(','),  groups.join(','), filenames.join(',')].join('\t'))
+    })
 })
