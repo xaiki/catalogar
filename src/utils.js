@@ -27,6 +27,7 @@ const makeFilename = e => {
 class Top {
     constructor() {
         this.data = {}
+        this.filenames = {}
     }
     add(e) {
         if (e.message_type === 'ciphertext') return
@@ -46,6 +47,13 @@ class Top {
             this.data[key].captions[e.media.caption] =
                 this.data[key].captions[e.media.caption] ?
                 this.data[key].captions[e.media.caption] + 1 : 1
+
+            if (this.data[key].filenames[e.media.filename]) {
+                const fn = this.filenames[e.media.filename]
+                this.data[key].filenames[fn] = this.data[key].filenames[fn] + 1
+            } else {
+                this.data[key].filenames[filename] = 1
+            }
         } else {
             this.data[key] = {
                 filename: filename,
@@ -58,6 +66,9 @@ class Top {
                 },
                 captions: {
                     [e.media.caption]: 1
+                },
+                filenames: {
+                    [e.media.filename]: 1
                 }
             }
         }
