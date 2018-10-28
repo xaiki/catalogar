@@ -73,13 +73,16 @@ class Top {
             }
         }
 
-        return this.data[key]
+        return key
     }
     values() {
         return Object.values(this.data)
     }
     sort() {
         return this.values().sort((a, b) => b.score - a.score)
+    }
+    get(key) {
+        return this.data[key]
     }
 }
 
