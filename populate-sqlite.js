@@ -41,8 +41,8 @@ const replaceCount = makeQuery(`REPLACE INTO counts VALUES(${countFIELDSA})`)
 const processCount = ({filename, total, senders, groups}) => ({
     filename,
     total,
-    senders: senders.length,
-    groups: groups.length
+    senders: Object.keys(senders).length,
+    groups: Object.keys(groups).length
 })
 
 const bulkInsert = db.transaction((docs) => {

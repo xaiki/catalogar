@@ -18,7 +18,7 @@ const makeFilename = e => {
     const src = e.sender_id.replace(/@.*/, '')
     const hash = crypto.createHash('md5')
                        .update(e.content || e.media.link).digest('hex')
-    const ext = e.media.mime.replace(/.*\//, '')
+    const ext = e.media.mime.replace(/.*\//, '').replace(/;.*/, '')
     const type = e.message_type
 
     return `${type}s/${date}_${src}_${hash}.${ext}`
