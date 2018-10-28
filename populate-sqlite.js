@@ -65,10 +65,11 @@ const processCount = ({filename, hash, total, senders, groups}) => ({
 
 const bulkInsert = db.transaction((docs, ups) => {
     const files = top.values()
+
     debug(`preparing inserts: ${docs.length} updates: ${ups.length} files: ${files.length}`)
     for (const doc of docs) insertChat.run(doc)
     debug(`inserted ${docs.length}`)
-    for (const doc of ups) updateChat.run(doc.hash, doc.rowid)
+    for (const args of ups) updateChat.run.apply(args)
     debug(`updated ${ups.length}`)
     for (const doc of files) replaceCount.run(processCount(doc))
     debug(`files ${files.length}`)
@@ -77,8 +78,6 @@ const bulkInsert = db.transaction((docs, ups) => {
 const populate = (source) => new Promise(accept => {
     // we don't have PRIMARY KEY or UNIQUE constraints in FTS,
     // so we filter here.
-    const docs = {}
-    const ups = {}
     const countGeneral = {
         filename: 'GENERAL',
         hash: null,
@@ -86,6 +85,8 @@ const populate = (source) => new Promise(accept => {
         senders: {},
         groups: {}
     }
+    const docs = []
+    const ups = []
 
     const reader = readline.createInterface({
         input: fs.createReadStream(source)
@@ -98,11 +99,12 @@ const populate = (source) => new Promise(accept => {
         countGeneral.groups[e.chat_id] = 1
 
         e.key = top.add(e)
+        const doc = e2f(e)
         if (e._id in idsh) {
             if (e._id in toupsh)
-                ups[e._id] = (e2f({...e, rowid: idsh[e._id]}))
+                ups.push[[doc.hash, idsh[e._id]]]
         } else {
-            docs[e._id] = (e2f(e))
+            docs.push(doc)
         }
     })
 
@@ -111,7 +113,7 @@ const populate = (source) => new Promise(accept => {
         countGeneral.groups = Object.keys(countGeneral.groups).length
 
         replaceCount.run(countGeneral)
-        bulkInsert(Object.values(docs), Object.values(ups))
+        bulkInsert(docs, ups)
 
         accept(db)
     })
