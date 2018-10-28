@@ -11,6 +11,6 @@ class Count {
     }
 }
 
-Count.FIELDS = ['filename CHAR(128) PRIMARY KEY', 'total INT', 'senders INT', 'groups INT']
+Count.FIELDS = ['hash CHAR(32) PRIMARY KEY', 'filename CHAR(32)', 'total INT', 'senders INT', 'groups INT']
 
 module.exports = Count

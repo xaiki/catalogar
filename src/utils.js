@@ -1,5 +1,8 @@
 const crypto = require('crypto')
 
+const md5 = data => crypto.createHash('md5')
+                          .update(data).digest('hex')
+
 const makeOldFilename = e => {
     if (e.message_type === 'chat') return `chats/${e._id}`
 
@@ -11,13 +14,11 @@ const makeOldFilename = e => {
     return `${type}s/${date}_${src}_${file}`
 }
 
-const makeFilename = e => {
+const makeFilename = (e, hash) => {
     if (e.message_type === 'chat') return `chats/${e._id}`
 
     const date = e.timestamp['$date'].replace(/\..*/, '').replace('T', '_').replace(/:/g, '-')
     const src = e.sender_id.replace(/@.*/, '')
-    const hash = crypto.createHash('md5')
-                       .update(e.content || e.media.link).digest('hex')
     const ext = e.media.mime.replace(/.*\//, '').replace(/;.*/, '')
     const type = e.message_type
 
@@ -91,4 +92,4 @@ const s2s = (senders) => Object.entries(senders)
                                .map(e => e.join(':'))
 
 
-module.exports = { makeFilename, s2s, Top }
+module.exports = { makeFilename, s2s, md5, Top }

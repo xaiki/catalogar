@@ -26,6 +26,9 @@ const SEARCH_CHATS = gql`
                 preview,
                 filename,
                 body,
+                total,
+                senders
+                groups,
             }
             pageInfo {
                 endCursor

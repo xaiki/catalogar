@@ -19,8 +19,16 @@ ${e}
     return ret
 }
 
+const join = schemas => ({
+    name: schemas[0].name,
+    FIELDS: Array.from(new Set(schemas.reduce((acc, cur) => acc.concat(
+        cur.FIELDS.map(f => f.replace(/ .*/, ''))
+    ),[])))
+})
+
 module.exports = {
     db,
+    join,
     o2gql,
     makeQuery,
 }

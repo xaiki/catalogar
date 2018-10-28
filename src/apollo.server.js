@@ -1,12 +1,15 @@
 const { ApolloServer, gql } = require('apollo-server');
-const { db, o2gql } = require('./connectors/apollo/sqlite')
+const { db, o2gql, join } = require('./connectors/apollo/sqlite')
 const Chat = require('./schemas/chat')
+const Count = require('./schemas/count')
 const debug = require('debug')('catalogar:server')
+
+debug(o2gql(join([Chat, Count])))
 
 // Type definitions define the "shape" of your data and specify
 // which ways the data can be fetched from the GraphQL server.
 const typeDefs = gql`
-    ${o2gql(Chat)}
+    ${o2gql(join([Chat, Count]))}
 
     type PageInfo {
         endCursor: Int

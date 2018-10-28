@@ -1,7 +1,7 @@
 const { storeVotes } = require('../votes')
 const debug = console.error.bind(console)
 
-const SELECT_ALL = `SELECT rowid,* FROM chats`
+const SELECT_ALL = `SELECT * FROM chats left join counts on chats.hash = counts.hash`
 
 const makeMatch = (match) => match ?
                              Object.entries(match)
@@ -15,7 +15,7 @@ class Chat {
         }
 
         const GET_ALL = makeQuery(`${SELECT_ALL}`)
-        const SEARCH = makeQuery(`${SELECT_ALL} WHERE chats MATCH ? LIMIT ? OFFSET ?`)
+        const SEARCH = makeQuery(`${SELECT_ALL} WHERE chats MATCH ? GROUP BY chats.hash ORDER BY total DESC LIMIT ? OFFSET ?`)
 
         const VOTE = makeQuery(`UPDATE chats SET votes = ? WHERE rowid = ?`)
         const COUNT_ALL = makeQuery(`SELECT COUNT(*) from chats`)
@@ -43,7 +43,7 @@ class Chat {
     }
 }
 
-Chat.FIELDS = ['id', 'timestamp', 'src', 'dest', 'group', 'type', 'preview', 'link', 'key', 'caption', 'mime', 'body', 'votes', 'filename']
+Chat.FIELDS = ['id', 'timestamp', 'src', 'dest', 'group', 'type', 'preview', 'link', 'key', 'caption', 'mime', 'body', 'votes', 'filename', 'hash']
 
 module.exports = Chat
 /*
