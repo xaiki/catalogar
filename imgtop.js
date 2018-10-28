@@ -22,6 +22,6 @@ reader.on('close', () => {
         const groups = s2s(e.groups)
         const filenames = s2s(e.filenames)
         console.log(
-            [e.filename, e.score, senders.length, groups.length, filenames.length, senders.join(','),  groups.join(','), filenames.join(',')].join('\t'))
+            [e.filename, e.total, senders.length, groups.length, filenames.length, senders.join(','),  groups.join(','), filenames.join(',')].join('\t'))
     })
 })

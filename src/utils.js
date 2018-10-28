@@ -37,7 +37,7 @@ class Top {
         const filename = makeFilename(e)
 
         if (this.data[key]) {
-            this.data[key].score++
+            this.data[key].total++
             this.data[key].senders[e.sender_id] =
                 this.data[key].senders[e.sender_id] ?
                 this.data[key].senders[e.sender_id] + 1 : 1
@@ -57,7 +57,7 @@ class Top {
         } else {
             this.data[key] = {
                 filename: filename,
-                score: 1,
+                total: 1,
                 senders: {
                     [e.sender_id]: 1
                 },
@@ -79,7 +79,7 @@ class Top {
         return Object.values(this.data)
     }
     sort() {
-        return this.values().sort((a, b) => b.score - a.score)
+        return this.values().sort((a, b) => b.total - a.total)
     }
     get(key) {
         return this.data[key]
