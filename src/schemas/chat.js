@@ -43,7 +43,7 @@ class Chat {
     }
 }
 
-Chat.FIELDS = ['id', 'timestamp', 'src', 'dest', 'group', 'type', 'preview', 'link', 'key', 'caption', 'mime', 'body', 'votes', 'filename']
+Chat.FIELDS = ['id', 'timestamp', 'src', 'dest', 'group', 'type', 'preview', 'link', 'key', 'caption', 'mime', 'body', 'votes', 'filename', 'links']
 
 module.exports = Chat
 /*
