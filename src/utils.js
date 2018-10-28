@@ -28,7 +28,7 @@ const makeFilename = (e, hash) => {
 class Top {
     constructor() {
         this.data = {}
-        this.filenames = {}
+        //        this.filenames = {}
     }
     add(e) {
         if (e.message_type === 'ciphertext') return
@@ -36,7 +36,6 @@ class Top {
         const key = ['audio', 'ptt', 'document']
             .indexOf(e.message_type) === -1 ? e.content : e.media.link
         const hash = md5(key)
-        const filename = makeFilename(e, hash)
 
         if (this.data[hash]) {
             this.data[hash].total++
@@ -46,19 +45,21 @@ class Top {
             this.data[hash].groups[e.chat_id] =
                 this.data[hash].groups[e.chat_id] ?
                 this.data[hash].groups[e.chat_id] + 1 : 1
-            this.data[hash].captions[e.media.caption] =
-                this.data[hash].captions[e.media.caption] ?
-                this.data[hash].captions[e.media.caption] + 1 : 1
+            /*
+               this.data[hash].captions[e.media.caption] =
+               this.data[hash].captions[e.media.caption] ?
+               this.data[hash].captions[e.media.caption] + 1 : 1
 
-            if (this.data[hash].filenames[e.media.filename]) {
-                const fn = this.filenames[e.media.filename]
-                this.data[hash].filenames[fn] = this.data[hash].filenames[fn] + 1
-            } else {
-                this.data[hash].filenames[filename] = 1
-            }
+               if (this.data[hash].filenames[e.media.filename]) {
+               const fn = this.filenames[e.media.filename]
+               this.data[hash].filenames[fn] = this.data[hash].filenames[fn] + 1
+               } else {
+               this.data[hash].filenames[filename] = 1
+               }
+             */
         } else {
             this.data[hash] = {
-                filename: filename,
+                filename: makeFilename(e, hash),
                 hash: hash,
                 total: 1,
                 senders: {
@@ -67,12 +68,12 @@ class Top {
                 groups: {
                     [e.chat_id]: 1
                 },
-                captions: {
-                    [e.media.caption]: 1
-                },
-                filenames: {
-                    [e.media.filename]: 1
-                }
+                /*       captions: {
+                   [e.media.caption]: 1
+                   },
+                   filenames: {
+                   [e.media.filename]: 1
+                   }*/
             }
         }
 
