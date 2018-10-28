@@ -72,7 +72,8 @@ const migrations = [
         `CREATE TABLE versions(collection CHAR(32) PRIMARY KEY, version INT);`,
     ])),
     db => updateChatCols(db).concat(createCounts(db).concat(prepareAll(db, [
-        `CREATE UNIQUE INDEX filename_index on counts(filename);`
+        `CREATE UNIQUE INDEX count_filename_idx on counts(filename);`,
+        `CREATE UNIQUE INDEX count_hash_idx on counts(hash);`
     ])))
 ]
 
