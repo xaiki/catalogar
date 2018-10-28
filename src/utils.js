@@ -55,4 +55,9 @@ class Top {
     }
 }
 
-module.exports = { makeFilename, Top }
+const s2s = (senders) => Object.entries(senders)
+                               .sort(([ka, va], [kb, vb]) => vb - va)
+                               .map(e => e.join(':'))
+
+
+module.exports = { makeFilename, s2s, Top }
