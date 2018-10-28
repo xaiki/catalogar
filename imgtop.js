@@ -1,6 +1,6 @@
 const fs = require('fs')
 const readline = require('readline')
-const { makeFilename, s2s, Top } = require('./src/utils')
+const { s2s, Top } = require('./src/utils')
 
 const top = new Top()
 const file = process.argv.pop()
