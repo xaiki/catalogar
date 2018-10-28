@@ -1,7 +1,8 @@
 const Chat = require('../src/schemas/chat')
+const Count = require('../src/schemas/count')
 const debug = require('debug')('catalogar:migrate')
 
-const TABLES = ['chats', 'links', 'db']
+const TABLES = ['chats', 'counts', 'db']
 const updateVersion = (db, table, version) => db.prepare(`INSERT INTO versions (collection, version) VALUES(?, ?) ON CONFLICT(collection) DO UPDATE SET version=excluded.version;`).run(table, version)
 const runStatements = (statements) => statements.map(s => {
     debug('running', s.source)
@@ -60,14 +61,19 @@ const updateChatCols = db => {
     return []
 }
 
+const countsFIELDS = Count.FIELDS.join(', ')
+const createCounts = db => {
+    run(db, [`CREATE TABLE counts(${countsFIELDS});`])
+    return []
+}
 const migrations = [
     /* 0 -> 1 */
     db => updateChatCols(db).concat(prepareAll(db, [
-        `CREATE TABLE links(id CHAR(128) PRIMARY KEY, shared_by, shared_in, ids);`,
         `CREATE TABLE versions(collection CHAR(32) PRIMARY KEY, version INT);`,
     ])),
-    /* 1 -> 2 */
-    db => updateChatCols(db)
+    db => updateChatCols(db).concat(createCounts(db).concat(prepareAll(db, [
+        `CREATE UNIQUE INDEX filename_index on counts(filename);`
+    ])))
 ]
 
 module.exports = (db) => {
